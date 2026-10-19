@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenCode 免费模型测试报告</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#16191d; --ink-2:#4a5159; --ink-3:#767e88;
+    --line:#e3e6ea; --line-2:#eef0f3;
+    --accent:#2f6fed; --accent-soft:#e8f0ff;
+    --good:#1a8754; --good-soft:#e4f5ec;
+    --warn:#9a6400; --warn-soft:#fdf3e0;
+    --bad:#c0392b; --bad-soft:#fdeceb;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --radius:12px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1115; --panel:#171a1f; --ink:#e8eaed; --ink-2:#b4bac2; --ink-3:#858d97;
+      --line:#262a31; --line-2:#1e2228;
+      --accent:#6f9bff; --accent-soft:#16233d;
+      --good:#4cc38a; --good-soft:#12261d;
+      --warn:#e0a83c; --warn-soft:#2a2113;
+      --bad:#f0776a; --bad-soft:#2b1817;
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    line-height:1.7; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
+  header{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:36px}
+  h1{font-size:2.1rem;line-height:1.25;margin:0 0 12px;letter-spacing:-.02em}
+  .sub{color:var(--ink-3);font-size:.95rem;margin:0}
+  .sub code{background:var(--line-2);padding:1px 6px;border-radius:4px;font-size:.88em}
+  h2{font-size:1.42rem;margin:48px 0 18px;letter-spacing:-.01em;display:flex;align-items:center;gap:12px}
+  h2::before{content:"";width:4px;height:1.05em;background:var(--accent);border-radius:2px;flex:none}
+  h3{font-size:1.06rem;margin:30px 0 12px;color:var(--ink)}
+  p{margin:12px 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;margin:18px 0}
+  .hero{background:linear-gradient(135deg,var(--accent-soft),var(--panel));border-color:var(--accent)}
+  .hero h3{margin-top:0}
+  .hero .model{font-family:var(--mono);font-size:1.16rem;font-weight:600;color:var(--accent);display:block;margin-bottom:14px}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin:18px 0}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+  .stat .k{font-size:.78rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+  .stat .v{font-size:1.5rem;font-weight:650;margin-top:4px;letter-spacing:-.02em}
+  .stat .v.good{color:var(--good)} .stat .v.warn{color:var(--warn)}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.9rem;background:var(--panel);
+        border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--line-2);vertical-align:top}
+  th{background:var(--line-2);font-weight:620;font-size:.82rem;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--accent-soft)}
+  td.num,th.num{text-align:right;font-family:var(--mono);font-size:.86rem;white-space:nowrap}
+  .best{background:var(--good-soft);font-weight:600}
+  .best:hover{background:var(--good-soft)}
+  .mono{font-family:var(--mono);font-size:.86rem}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:.76rem;font-weight:600;white-space:nowrap}
+  .t-good{background:var(--good-soft);color:var(--good)}
+  .t-warn{background:var(--warn-soft);color:var(--warn)}
+  .t-bad{background:var(--bad-soft);color:var(--bad)}
+  .t-mute{background:var(--line-2);color:var(--ink-3)}
+  .note{border-left:3px solid var(--warn);background:var(--warn-soft);padding:14px 18px;border-radius:0 8px 8px 0;margin:18px 0;font-size:.92rem}
+  .note.info{border-color:var(--accent);background:var(--accent-soft)}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;overflow-x:auto;
+      font-family:var(--mono);font-size:.83rem;line-height:1.6;color:var(--ink-2)}
+  code{font-family:var(--mono);font-size:.88em}
+  p code,li code,td code{background:var(--line-2);padding:1.5px 6px;border-radius:4px;color:var(--ink)}
+  pre code{background:none;padding:0;color:inherit}
+  ol,ul{padding-left:24px} li{margin:7px 0}
+  .pill-row{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:5px 14px;font-size:.85rem}
+  .pill.add{border-color:var(--good);color:var(--good);background:var(--good-soft)}
+  .pill.del{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+  .err{background:var(--bad-soft);border:1px solid var(--bad);color:var(--bad);padding:12px 16px;border-radius:8px;
+       font-family:var(--mono);font-size:.82rem;white-space:pre-wrap;margin:12px 0}
+  .foot{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--ink-3);font-size:.86rem}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 24px;margin-bottom:8px}
+  .toc ol{margin:6px 0 0;padding-left:22px;columns:2;column-gap:32px}
+  @media (max-width:640px){
+    .wrap{padding:26px 16px 60px} h1{font-size:1.6rem} .toc ol{columns:1}
+    table{display:block;overflow-x:auto;white-space:nowrap}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>OpenCode 免费模型测试报告</h1>
+  <p class="sub">测试时间 2026-10-18 ~ 2026-10-19 &nbsp;·&nbsp; 环境 Windows / PowerShell / OpenCode <code>v2.0.32</code> &nbsp;·&nbsp; 目标：连通稳定性、响应延迟、工具调用与代码生成能力</p>
+</header>
+
+<div class="toc">
+  <strong style="font-size:.85rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em">目录</strong>
+  <ol>
+    <li><a href="#conclusion">结论速览</a></li>
+    <li><a href="#method">测试方法</a></li>
+    <li><a href="#results">测试结果</a></li>
+    <li><a href="#unavailable">不可用模型及原因</a></li>
+    <li><a href="#advice">选型建议</a></li>
+    <li><a href="#files">附：目录文件</a></li>
+  </ol>
+</div>
+
+<!-- 1 -->
+<h2 id="conclusion">1. 结论速览</h2>
+
+<div class="card hero">
+  <h3 style="margin-bottom:2px">当前推荐</h3>
+  <span class="model">opencode/minimax-m3.1-flash-free</span>
+  <div class="grid">
+    <div class="stat"><div class="k">稳定性</div><div class="v good">7 / 7</div><div class="k" style="text-transform:none;letter-spacing:0">5 轮 + 2 轮验证，全通过</div></div>
+    <div class="stat"><div class="k">中位延迟</div><div class="v good">10.1s</div><div class="k" style="text-transform:none;letter-spacing:0">第二名的 1/2</div></div>
+    <div class="stat"><div class="k">延迟振幅</div><div class="v good">6.6s</div><div class="k" style="text-transform:none;letter-spacing:0">6.3 ~ 12.9s，全榜最集中</div></div>
+    <div class="stat"><div class="k">能力项</div><div class="v good">3 / 3</div><div class="k" style="text-transform:none;letter-spacing:0">工具调用 / 推理 / 代码</div></div>
+  </div>
+</div>
+
+<h3>关键发现：免费模型阵容在滚动轮换</h3>
+<div class="pill-row">
+  <span class="pill add">➕ 新增 minimax-m3.1-flash-free — 2026-10-19 上线，即本次测试的"当前模型"</span>
+  <span class="pill del">➖ 下架 space-bunny-free — 10-18 尚可用，10-19 已返回 Model unavailable</span>
+</div>
+<div class="note">
+  ⚠️ 这意味着<strong>任何免费模型排名都有时效性</strong>。本次首轮结论"space-bunny-free 最快"在次日即失效。建议每隔一段时间复测。
+</div>
+
+<!-- 2 -->
+<h2 id="method">2. 测试方法</h2>
+
+<h3>2.1 总体思路</h3>
+<p>以 <code>opencode run</code> 作为统一调用入口（非交互模式，与 TUI 走同一套 provider 链路），对每个模型施加<strong>完全相同</strong>的题目，记录各维度指标：</p>
+<table>
+  <thead><tr><th>维度</th><th>观测指标</th></tr></thead>
+  <tbody>
+    <tr><td>连通稳定性</td><td>连续 N 轮中完全通过的轮数（pass rate）</td></tr>
+    <tr><td>响应延迟</td><td>每轮端到端耗时：平均 / 中位 / 最小 / 最大</td></tr>
+    <tr><td>工具调用</td><td>是否真正调用 <code>read</code> 工具读出夹具文件中的密钥</td></tr>
+    <tr><td>推理能力</td><td>注水池多步算术题是否得出正确答案</td></tr>
+    <tr><td>代码生成</td><td>是否给出可用的函数实现；是否满足复杂度要求</td></tr>
+  </tbody>
+</table>
+
+<h3>2.2 测试题目</h3>
+
+<h4 style="margin:20px 0 8px;font-size:.95rem">题目 A —— 标准题（工具调用 + 推理 + 代码，三合一）</h4>
+<pre><code>Read MODEL_TEST_FIXTURE.md and report the value after SECRET_CODE:.
+Answer: two pipes fill a pool, A takes 6 hours, B takes 4 hours, both together how many hours?
+Write a one-line JS function isPrime(n).
+Output three lines: SECRET=&lt;value&gt;, HOURS=&lt;number&gt;, CODE=&lt;fn&gt;</code></pre>
+<p>配套夹具文件 <code>MODEL_TEST_FIXTURE.md</code>（同目录），内含唯一标记：</p>
+<pre><code>SECRET_CODE: ZX-9137-QQ</code></pre>
+<p>三项判定（<code>pass</code> = 三项全中）：</p>
+<table>
+  <thead><tr><th>字段</th><th>判定正则</th><th>考察点</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">secret</td><td class="mono">输出含 ZX-9137-QQ</td><td><strong>工具调用</strong>：必须真的用 <code>read</code> 打开文件才能拿到值，无法靠猜</td></tr>
+    <tr><td class="mono">hours</td><td class="mono">HOURS[:=] 2.4（或 12/5）</td><td><strong>多步推理</strong>：1/6 + 1/4 = 5/12 → 12/5 = 2.4 小时</td></tr>
+    <tr><td class="mono">code</td><td class="mono">输出含 isPrime</td><td><strong>代码生成</strong></td></tr>
+  </tbody>
+</table>
+
+<h4 style="margin:20px 0 8px;font-size:.95rem">题目 B —— 质量题（算法题）</h4>
+<pre><code>Write a JavaScript function longestIncreasingSubsequence(arr) returning the length of
+the longest strictly increasing subsequence, O(n log n).
+Then answer: what does longestIncreasingSubsequence([10,9,2,5,3,7,101,18]) return?
+Output exactly two lines: ANSWER=&lt;number&gt; and CODE=&lt;the function&gt;</code></pre>
+<ul>
+  <li>标准答案 <code>ANSWER=4</code>（例如 <code>2,3,7,18</code>）</li>
+  <li><code>codeOk</code>：代码含 <code>function</code> 或 <code>=&gt;</code>，且含 <code>bisect|lower_bound|tails|push|splice|sort</code> 之一</li>
+  <li><strong>正则未命中时一律人工复核实际代码</strong>（本次对 space-bunny / nemotron / glm 三例做了人工复核，均为正确实现，判定为正则误报）</li>
+</ul>
+
+<h3>2.3 稳定性测试协议</h3>
+<ul>
+  <li>每个模型连续执行 N 轮同一道题（N = 5 为主，部分模型 N = 3）</li>
+  <li>记录逐轮耗时数组，统计 <strong>pass 数、平均值、中位数、最小值、最大值</strong></li>
+  <li>中位数优先于平均值：免费档存在偶发长尾，均值容易被单次冷启动 / 排队拉偏</li>
+  <li><strong>首轮存在冷启动</strong>（实测首次调用可达 85s+），故以中位数与多次采样为准</li>
+</ul>
+
+<h3>2.4 计时与判读实现</h3>
+<pre><code># 计时：包裹子进程调用
+$sw = [System.Diagnostics.Stopwatch]::StartNew()
+$stdout = (&amp; opencode run --model $Model $PROMPT 2&gt;&amp;1 | Out-String)
+$sw.Stop()
+$ms = [int]$sw.Elapsed.TotalMilliseconds
+
+# 判读：剥离 ANSI 控制序列与非 ASCII 字符后正则匹配
+($s -replace "`e\[[0-9;]*[mK]", "") -replace "[^\x20-\x7E]", " "</code></pre>
+<p>完整脚本见同目录 <code>bench.ps1</code>，夹具见 <code>MODEL_TEST_FIXTURE.md</code>。</p>
+
+<h3>2.5 复现步骤</h3>
+<pre><code>cd "D:\02 AI\opencode\model test"
+
+# 单个模型，5 轮稳定性 + 1 轮质量
+.\bench.ps1 -Model "opencode/minimax-m3.1-flash-free" -N 5
+
+# 批量对比
+.\bench.ps1 -Models "opencode/deepseek-v4.1-flash-free,opencode/big-pickle" -N 5
+
+# 查看当前免费模型目录
+opencode models</code></pre>
+
+<h3>2.6 方法局限性</h3>
+<ol>
+  <li><strong>单时段快照</strong>：免费档延迟随平台负载剧烈波动，跨时段差异可达数倍，结论仅代表采样时刻。</li>
+  <li><strong>样本量有限</strong>：每模型 3~5 轮，只能发现明显的稳定性问题，无法刻画长尾概率。</li>
+  <li><strong>题目偏简单</strong>：标准题所有可用模型均满分，未能拉开差距；区分度主要来自延迟与稳定性。</li>
+  <li><strong>判定用正则启发式</strong>：代码质量未做人工逐行评审，可能漏判风格问题或同解不同写法。</li>
+  <li><strong>未覆盖</strong>：超长上下文、视觉输入、工具并发、流式中断恢复、token 配额约束。</li>
+</ol>
+
+<!-- 3 -->
+<h2 id="results">3. 测试结果</h2>
+
+<h3>3.1 当前可用模型完整榜单（2026-10-19 实测）</h3>
+<table>
+  <thead><tr>
+    <th>模型</th><th>上架日期</th><th class="num">稳定性</th><th class="num">平均</th>
+    <th class="num">中位</th><th class="num">最小</th><th class="num">最大</th><th>质量题</th>
+  </tr></thead>
+  <tbody>
+    <tr class="best">
+      <td class="mono">minimax-m3.1-flash-free</td><td class="mono">2026-10-19</td>
+      <td class="num">5/5</td><td class="num">10.1s</td><td class="num">10.1s</td><td class="num">6.3s</td><td class="num">12.9s</td>
+      <td><span class="tag t-good">✅ 6.5s</span></td>
+    </tr>
+    <tr>
+      <td class="mono">deepseek-v4.1-flash-free</td><td class="mono">2026-09-10</td>
+      <td class="num">5/5</td><td class="num">22.5s</td><td class="num">19.2s</td><td class="num">10.6s</td><td class="num">47.9s</td>
+      <td><span class="tag t-good">✅ 4.9s</span></td>
+    </tr>
+    <tr>
+      <td class="mono">big-pickle</td><td class="mono">2025-10-17</td>
+      <td class="num">3/3</td><td class="num">22.5s</td><td class="num">23.9s</td><td class="num">18.9s</td><td class="num">24.7s</td>
+      <td><span class="tag t-good">✅ 7.6s</span></td>
+    </tr>
+    <tr>
+      <td class="mono">mimo-v2.6-flash-free</td><td class="mono">2026-09-22</td>
+      <td class="num">3/3</td><td class="num">24.9s</td><td class="num">24.7s</td><td class="num">14.1s</td><td class="num">35.9s</td>
+      <td><span class="tag t-good">✅ 19.8s</span></td>
+    </tr>
+    <tr>
+      <td class="mono">longcat-2.5-preview-free</td><td class="mono">2026-09-25</td>
+      <td class="num">2/3</td><td class="num">26.1s</td><td class="num">16.5s</td><td class="num">15.6s</td><td class="num">46.1s</td>
+      <td><span class="tag t-good">✅ 10.1s</span></td>
+    </tr>
+    <tr>
+      <td class="mono">glm-5.3-flash-free</td><td class="mono">2026-08-26</td>
+      <td class="num">3/3</td><td class="num">31.0s</td><td class="num">31.5s</td><td class="num">8.6s</td><td class="num">52.8s</td>
+      <td><span class="tag t-good">✅ 39.5s</span></td>
+    </tr>
+    <tr>
+      <td class="mono">nemotron-3.5-super-vl-free</td><td class="mono">2026-10-15</td>
+      <td class="num">3/3</td><td class="num">42.6s</td><td class="num">44.0s</td><td class="num">14.7s</td><td class="num">69.1s</td>
+      <td><span class="tag t-good">✅ 28.0s</span></td>
+    </tr>
+    <tr>
+      <td class="mono">beam-free</td><td class="mono">2026-10-05</td>
+      <td class="num"><span class="tag t-bad">地区封锁</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td>
+      <td><span class="tag t-mute">—</span></td>
+    </tr>
+    <tr>
+      <td class="mono">space-bunny-free</td><td class="mono">—</td>
+      <td class="num"><span class="tag t-bad">已下架</span></td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td>
+      <td><span class="tag t-mute">—</span></td>
+    </tr>
+  </tbody>
+</table>
+<div class="note info">
+  附加验证：<code>minimax-m3.1-flash-free</code> 于 22:21 另跑 2 轮，2/2 通过，中位 7.3s，区间 6.7~7.3s —— 累计 <strong>7/7 无失败</strong>。
+</div>
+
+<h3>3.2 前一日快照（2026-10-18）—— 用于观察轮换</h3>
+<table>
+  <thead><tr>
+    <th>模型</th><th class="num">稳定性</th><th class="num">平均</th><th class="num">中位</th>
+    <th class="num">最小</th><th class="num">最大</th><th>备注</th>
+  </tr></thead>
+  <tbody>
+    <tr><td class="mono">space-bunny-free</td><td class="num">5/5</td><td class="num">6.4s</td><td class="num">5.0s</td><td class="num">4.2s</td><td class="num">11.2s</td><td><span class="tag t-bad">当时最快，次日已下架</span></td></tr>
+    <tr><td class="mono">deepseek-v4.1-flash-free</td><td class="num">5/5</td><td class="num">8.4s</td><td class="num">8.5s</td><td class="num">7.2s</td><td class="num">10.4s</td><td>当时延迟最集中</td></tr>
+    <tr><td class="mono">longcat-2.5-preview-free</td><td class="num">5/5</td><td class="num">14.5s</td><td class="num">12.9s</td><td class="num">11.9s</td><td class="num">17.8s</td><td></td></tr>
+    <tr><td class="mono">big-pickle</td><td class="num">5/5</td><td class="num">17.4s</td><td class="num">15.1s</td><td class="num">11.8s</td><td class="num">31.3s</td><td></td></tr>
+    <tr><td class="mono">nemotron-3.5-super-vl-free</td><td class="num">5/5</td><td class="num">39.6s</td><td class="num">32.8s</td><td class="num">11.3s</td><td class="num">85.4s</td><td></td></tr>
+    <tr><td class="mono">mimo-v2.6-flash-free</td><td class="num">5/5</td><td class="num">54.3s</td><td class="num">19.9s</td><td class="num">10.4s</td><td class="num">137.1s</td><td>长尾极严重</td></tr>
+    <tr><td class="mono">glm-5.3-flash-free</td><td class="num">4/5</td><td class="num">32.9s</td><td class="num">27.8s</td><td class="num">16.1s</td><td class="num">63.5s</td><td><span class="tag t-warn">有 1 轮失败</span></td></tr>
+  </tbody>
+</table>
+<div class="note info">
+  同模型跨日对比可见平台负载影响：<code>deepseek-v4.1-flash-free</code> 中位由 8.5s 变为 19.2s，<code>mimo-v2.6-flash-free</code> 平均由 54.3s 变为 24.9s。
+</div>
+
+<!-- 4 -->
+<h2 id="unavailable">4. 不可用模型及原因</h2>
+
+<h3>A. <span class="mono" style="font-size:.9em">opencode-zen</span> 提供商 —— 全部 7 个模型，API key 已过期</h3>
+<table>
+  <thead><tr><th>模型</th><th>状态</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">opencode-zen/big-pickle</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
+    <tr><td class="mono">opencode-zen/deepseek-v4-flash-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
+    <tr><td class="mono">opencode-zen/ling-3.0-flash-fin-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
+    <tr><td class="mono">opencode-zen/mimo-v2.5-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
+    <tr><td class="mono">opencode-zen/muse-spark-1.3-contributor-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
+    <tr><td class="mono">opencode-zen/nemotron-3-ultra-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
+    <tr><td class="mono">opencode-zen/nemotron-3.5-lightning-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
+  </tbody>
+</table>
+<p>报错原文：</p>
+<div class="err">Error: This API key has expired. Create a new API key in OpenCode Console and
+replace it in your client or secret store. Signing in again will not renew this key.</div>
+<p><strong>排查结论</strong>：<code>opencode-zen</code> 是配置在 <code>~/.config/opencode/opencode.jsonc</code> 里的<strong>手动自定义 provider</strong>，指向遗留端点 <code>https://opencode.ai/zen/v1</code> + 一个硬编码的过期 key，与内置 <code>opencode</code> 通道完全独立。</p>
+<p>实测尝试过用 Console OAuth（浏览器 "Authorize OpenCode CLI"）重新连接，<strong>未能</strong>产出可填入的 <code>sk-</code> key：OAuth 授权与 <code>sk-</code> API key 属两套体系，<code>opencode auth export</code> 中仍只有 Zhipu 账号。要使用这 5 个 zen 专属模型（<code>mimo-v2.5-free</code>、<code>nemotron-3.5-lightning-free</code>、<code>nemotron-3-ultra-free</code>、<code>muse-spark-1.3-contributor-free</code>、<code>ling-3.0-flash-fin-free</code>），需在 <code>opencode.ai/console → API keys → Create key</code> 生成真实 <code>sk-</code> key。</p>
+<div class="note">这些模型与已可用的 7 个高度重叠（<code>mimo-v2.6</code> &gt; <code>mimo-v2.5</code>、<code>nemotron-3.5-super-vl</code> 已覆盖 nemotron 系列），实际增益有限。</div>
+
+<h3>B. <span class="mono" style="font-size:.9em">beam-free</span> —— 地区限制</h3>
+<div class="err">Error: This model is not available in your country</div>
+<p>官方文档列明该模型在部分国家 / 地区不可用，当前网络环境位于受限范围。</p>
+
+<h3>C. <span class="mono" style="font-size:.9em">space-bunny-free</span> —— 已从模型目录移除</h3>
+<p>客户端直接返回 <code>Model unavailable</code>（&lt;1s 拒绝，非超时），属目录层面移除而非服务故障。</p>
+
+<!-- 5 -->
+<h2 id="advice">5. 选型建议</h2>
+<table>
+  <thead><tr><th>场景</th><th>推荐</th><th>理由</th></tr></thead>
+  <tbody>
+    <tr class="best"><td><strong>默认模型</strong></td><td class="mono">opencode/minimax-m3.1-flash-free</td><td>速度、稳定性、能力三项综合最优；7/7 无失败</td></tr>
+    <tr><td>追求最快响应</td><td class="mono">opencode/minimax-m3.1-flash-free</td><td>中位 10.1s，无更快的在架模型</td></tr>
+    <tr><td>长文档 / 长上下文</td><td class="mono">opencode/longcat-2.5-preview-free</td><td>主打长上下文，但需接受 2/3 的稳定性</td></tr>
+    <tr><td>多模态（看图）</td><td class="mono">opencode/nemotron-3.5-super-vl-free</td><td>唯一在架的 VL 模型，代价是 44s 中位延迟</td></tr>
+    <tr><td>规避</td><td class="mono">glm-5.3-flash-free<br>mimo-v2.6-flash-free</td><td>前者曾出现轮次失败，后者长尾达 137s</td></tr>
+  </tbody>
+</table>
+
+<h3>落地方案</h3>
+<pre><code>// ~/.config/opencode/opencode.jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode/minimax-m3.1-flash-free"
+}</code></pre>
+
+<!-- 6 -->
+<h2 id="files">6. 附：本目录文件</h2>
+<table>
+  <thead><tr><th>文件</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">README.md</td><td>本报告（Markdown 版）</td></tr>
+    <tr><td class="mono">index.html</td><td>本报告（HTML 版，可直接浏览器打开）</td></tr>
+    <tr><td class="mono">bench.ps1</td><td>基准测试脚本（稳定性 + 质量双测试）</td></tr>
+    <tr><td class="mono">MODEL_TEST_FIXTURE.md</td><td>测试夹具，内含用于校验工具调用能力的唯一标记</td></tr>
+  </tbody>
+</table>
+
+<div class="foot">
+  <strong>免责声明</strong>：测试结论基于特定时间点的采样，免费模型阵容与延迟会随平台调整而变化，选型前建议按 <code>bench.ps1</code> 复测。<br>
+  生成时间：2026-10-19 · OpenCode v2.0.32 · 报告目录 <code>D:\02 AI\opencode\model test</code>
+</div>
+
+</div>
+</body>
+</html>
