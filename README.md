@@ -178,32 +178,7 @@ $ms = [int]$sw.Elapsed.TotalMilliseconds
 
 ## ❌ 不可用模型及原因
 
-### A. `opencode-zen` 提供商 —— 全部 7 个模型，API key 已过期
-
-| 模型 | 状态 |
-|---|---|
-| `opencode-zen/big-pickle` | ❌ API key 过期 |
-| `opencode-zen/deepseek-v4-flash-free` | ❌ API key 过期 |
-| `opencode-zen/ling-3.0-flash-fin-free` | ❌ API key 过期 |
-| `opencode-zen/mimo-v2.5-free` | ❌ API key 过期 |
-| `opencode-zen/muse-spark-1.3-contributor-free` | ❌ API key 过期 |
-| `opencode-zen/nemotron-3-ultra-free` | ❌ API key 过期 |
-| `opencode-zen/nemotron-3.5-lightning-free` | ❌ API key 过期 |
-
-报错原文：
-
-```text
-Error: This API key has expired. Create a new API key in OpenCode Console and
-replace it in your client or secret store. Signing in again will not renew this key.
-```
-
-**排查结论**：`opencode-zen` 是配置在 `~/.config/opencode/opencode.jsonc` 里的**手动自定义 provider**，指向遗留端点 `https://opencode.ai/zen/v1` + 一个硬编码的过期 key，与内置 `opencode` 通道完全独立。
-
-实测尝试过用 Console OAuth（浏览器 "Authorize OpenCode CLI"）重新连接，**未能**产出可填入的 `sk-` key：OAuth 授权与 `sk-` API key 属两套体系，`opencode auth export` 中仍只有原账号。要使用这 5 个 zen 专属模型（`mimo-v2.5-free`、`nemotron-3.5-lightning-free`、`nemotron-3-ultra-free`、`muse-spark-1.3-contributor-free`、`ling-3.0-flash-fin-free`），需在 `opencode.ai/console → API keys → Create key` 生成真实 `sk-` key。
-
-> 这些模型与已可用的 7 个高度重叠（`mimo-v2.6` > `mimo-v2.5`、`nemotron-3.5-super-vl` 已覆盖 nemotron 系列），实际增益有限。
-
-### B. `beam-free` —— 地区限制
+### A. `beam-free` —— 地区限制
 
 ```text
 Error: This model is not available in your country
@@ -211,7 +186,7 @@ Error: This model is not available in your country
 
 官方文档列明该模型在部分国家 / 地区不可用，当前网络环境位于受限范围。
 
-### C. `space-bunny-free` —— 已从模型目录移除
+### B. `space-bunny-free` —— 已从模型目录移除
 
 客户端直接返回 `Model unavailable`（<1s 拒绝，非超时），属目录层面移除而非服务故障。
 

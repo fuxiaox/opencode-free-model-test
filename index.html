@@ -300,31 +300,11 @@ opencode models</code></pre>
 <!-- 4 -->
 <h2 id="unavailable">4. 不可用模型及原因</h2>
 
-<h3>A. <span class="mono" style="font-size:.9em">opencode-zen</span> 提供商 —— 全部 7 个模型，API key 已过期</h3>
-<table>
-  <thead><tr><th>模型</th><th>状态</th></tr></thead>
-  <tbody>
-    <tr><td class="mono">opencode-zen/big-pickle</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
-    <tr><td class="mono">opencode-zen/deepseek-v4-flash-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
-    <tr><td class="mono">opencode-zen/ling-3.0-flash-fin-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
-    <tr><td class="mono">opencode-zen/mimo-v2.5-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
-    <tr><td class="mono">opencode-zen/muse-spark-1.3-contributor-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
-    <tr><td class="mono">opencode-zen/nemotron-3-ultra-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
-    <tr><td class="mono">opencode-zen/nemotron-3.5-lightning-free</td><td><span class="tag t-bad">❌ API key 过期</span></td></tr>
-  </tbody>
-</table>
-<p>报错原文：</p>
-<div class="err">Error: This API key has expired. Create a new API key in OpenCode Console and
-replace it in your client or secret store. Signing in again will not renew this key.</div>
-<p><strong>排查结论</strong>：<code>opencode-zen</code> 是配置在 <code>~/.config/opencode/opencode.jsonc</code> 里的<strong>手动自定义 provider</strong>，指向遗留端点 <code>https://opencode.ai/zen/v1</code> + 一个硬编码的过期 key，与内置 <code>opencode</code> 通道完全独立。</p>
-<p>实测尝试过用 Console OAuth（浏览器 "Authorize OpenCode CLI"）重新连接，<strong>未能</strong>产出可填入的 <code>sk-</code> key：OAuth 授权与 <code>sk-</code> API key 属两套体系，<code>opencode auth export</code> 中仍只有 Zhipu 账号。要使用这 5 个 zen 专属模型（<code>mimo-v2.5-free</code>、<code>nemotron-3.5-lightning-free</code>、<code>nemotron-3-ultra-free</code>、<code>muse-spark-1.3-contributor-free</code>、<code>ling-3.0-flash-fin-free</code>），需在 <code>opencode.ai/console → API keys → Create key</code> 生成真实 <code>sk-</code> key。</p>
-<div class="note">这些模型与已可用的 7 个高度重叠（<code>mimo-v2.6</code> &gt; <code>mimo-v2.5</code>、<code>nemotron-3.5-super-vl</code> 已覆盖 nemotron 系列），实际增益有限。</div>
-
-<h3>B. <span class="mono" style="font-size:.9em">beam-free</span> —— 地区限制</h3>
+<h3>A. <span class="mono" style="font-size:.9em">beam-free</span> —— 地区限制</h3>
 <div class="err">Error: This model is not available in your country</div>
 <p>官方文档列明该模型在部分国家 / 地区不可用，当前网络环境位于受限范围。</p>
 
-<h3>C. <span class="mono" style="font-size:.9em">space-bunny-free</span> —— 已从模型目录移除</h3>
+<h3>B. <span class="mono" style="font-size:.9em">space-bunny-free</span> —— 已从模型目录移除</h3>
 <p>客户端直接返回 <code>Model unavailable</code>（&lt;1s 拒绝，非超时），属目录层面移除而非服务故障。</p>
 
 <!-- 5 -->
